@@ -15,22 +15,27 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def create_all():
-    from app.models.post import Post  # noqa: F401
-    from app.models.tag import Tag  # noqa: F401
-    from app.models.tag.association import Association  # noqa: F401
-    from app.models.user import User  # noqa: F401
+    """Create all database tables."""
+    from app.models.restaurant import Restaurant  # noqa: F401
+    from app.models.location import Location  # noqa: F401
+    from app.models.table import Table  # noqa: F401
+    from app.models.account import Account  # noqa: F401
+    from app.models.account_item import AccountItem  # noqa: F401
+    from app.models.webhook_log import WebhookLog  # noqa: F401
+    from app.models.staff_user import StaffUser  # noqa: F401
 
     async with engine.begin() as conn:
         logger.info("Creating all tables if they don't exist")
-        await conn.run_sync(User.metadata.create_all)
+        await conn.run_sync(Restaurant.metadata.create_all)
 
 
 async def drop_all():
-    from app.models.user import User  # noqa: F401
+    """Drop all database tables (only in allowed environments)."""
+    from app.models.restaurant import Restaurant  # noqa: F401
 
     if config.ENV_STATE in config.DROP_ENVS:
         async with engine.begin() as conn:
             logger.warning("Dropping all tables")
-            await conn.run_sync(User.metadata.drop_all)
+            await conn.run_sync(Restaurant.metadata.drop_all)
     else:
         logger.warning("Dropping tables not allowed in this environment")

@@ -13,7 +13,7 @@ from app.models.auth.schemas import TokenDecode, TokenEncode
 
 class Token(BaseModel):
     id: Annotated[UUID, AfterValidator(lambda x: x.hex)]
-    scope: list[Role] = [Role.USER]
+    scope: list[Role] = [Role.STAFF]
     expires_in: int = config.TOKEN_EXPIRE_SECONDS
     iat: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from app.config import config
 from app.database.functions import create_all, drop_all
 from app.functions.logger import setup_logger
-from app.models.user.functions import create_admin_user
+from app.functions.seed import create_seed_data
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ async def lifespan(_: FastAPI):
     logger.warning(f"Starting the application: ENV={config.ENV_STATE}")
     await drop_all()
     await create_all()
-    await create_admin_user()
+    await create_seed_data()
     yield
     logger.warning("Shutting down the application")
 

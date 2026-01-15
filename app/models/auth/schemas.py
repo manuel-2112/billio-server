@@ -10,7 +10,7 @@ class TokenEncode(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
-    scope: list[Role] = [Role.USER]
+    scope: list[Role] = [Role.STAFF]
 
 
 class TokenDecode(BaseModel):

@@ -1,27 +1,31 @@
 from typing import Annotated
 
-from fastapi import Depends, Security
+from fastapi import Depends
 
 from app.models.auth.functions import Authenticate, authorize, authorize_limited
-from app.models.auth.role import Role
 from app.models.auth.schemas import TokenDecode, TokenEncode
-from app.models.user import User
+from app.models.staff_user import StaffUser
 
+# Token authorization (just validates token)
 authorizeDep = Annotated[TokenDecode, Depends(authorize)]
 
+# Token authorization with rate limiting
 authorizeLimitDep = Annotated[TokenDecode, Depends(authorize_limited)]
 
-authorizeLoadDep = Annotated[User, Depends(Authenticate().from_token)]
+# Authorize and load user from token
+authorizeLoadDep = Annotated[StaffUser, Depends(Authenticate().from_token)]
 
-authorizeLoadRelationshipsDep = Annotated[User, Depends(Authenticate(True).from_token)]
+# Authorize and load user with relationships
+authorizeLoadRelationshipsDep = Annotated[StaffUser, Depends(Authenticate(True).from_token)]
 
-authenticateDep = Annotated[User, Depends(Authenticate())]
+# Authenticate with credentials (login)
+authenticateDep = Annotated[StaffUser, Depends(Authenticate())]
 
+# Authenticate and return token
 authenticateTokenDep = Annotated[TokenEncode, Depends(Authenticate.to_token)]
 
-authenticateRelationshipsDep = Annotated[User, Depends(Authenticate(True))]
-
-resetLoadDep = Annotated[User, Security(Authenticate().from_token, scopes=[Role.RESET])]
+# Authenticate with relationships
+authenticateRelationshipsDep = Annotated[StaffUser, Depends(Authenticate(True))]
 
 __all__ = [
     "authorizeDep",
@@ -31,5 +35,4 @@ __all__ = [
     "authenticateDep",
     "authenticateTokenDep",
     "authenticateRelationshipsDep",
-    "resetLoadDep",
 ]

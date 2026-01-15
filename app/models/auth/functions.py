@@ -11,7 +11,7 @@ from app.models.auth.role import Role
 from app.models.auth.schemas import TokenDecode, TokenEncode
 from app.models.auth.schemes import oauth2_scheme
 from app.models.auth.token import Token
-from app.models.user import User
+from app.models.staff_user import StaffUser
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +34,12 @@ def authorize_limited(token: Annotated[TokenDecode, Depends(authorize)]) -> Toke
 
 class Authenticate:
     def __init__(self, load_relationships: bool = False):
-        self.relationships = [User.posts, User.tags] if load_relationships else None
+        self.relationships = [StaffUser.restaurant] if load_relationships else None
 
     async def __call__(
         self, async_session: sessDep, credentials: OAuth2PasswordRequestForm = Depends()
-    ) -> User:
-        user = await User.find(
+    ) -> StaffUser:
+        user = await StaffUser.find(
             async_session,
             email=credentials.username,
             raise_=False,
@@ -47,8 +47,8 @@ class Authenticate:
         )
         if not user or not user.check_password(credentials.password):
             raise unauthorized_basic()
-        elif user.verified is False:
-            raise forbidden("User not verified. Request reset password.")
+        elif user.is_active is False:
+            raise forbidden("User account is disabled.")
         logger.info(
             f"Authenticating {user.id=} and {user.email=} relationships={self.relationships}"
         )
@@ -56,8 +56,8 @@ class Authenticate:
 
     async def from_token(
         self, async_session: sessDep, token: Annotated[TokenDecode, Depends(authorize)]
-    ) -> User:
-        user = await User.get(
+    ) -> StaffUser:
+        user = await StaffUser.get(
             async_session, id=token.id, relationships=self.relationships
         )
         logger.info(f"Authorizing token and loading {user.id=} and {user.email=}")
@@ -71,4 +71,4 @@ class Authenticate:
     ) -> TokenEncode:
         user = await cls()(async_session, credentials)
         logger.info(f"Generating token for {user.id=} and {user.email=}")
-        return Token(id=user.id, scope=user.scope).encode()
+        return Token(id=user.id, scope=[Role.STAFF]).encode()
