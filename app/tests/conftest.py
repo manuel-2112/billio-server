@@ -9,6 +9,7 @@ from app.database.functions import create_all, drop_all
 
 # Import fixtures
 from app.tests.fixtures import (  # noqa: F401
+    seeded_data,
     admin_token,
     test_restaurant,
     test_location,

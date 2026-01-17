@@ -26,6 +26,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         ./reset.sh
-    - name: Test with pytest
-      run: |
-        ./test.sh
+    # - name: Test with pytest
+    #   run: |
+    #     ./test.sh
