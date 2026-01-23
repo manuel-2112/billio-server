@@ -13,7 +13,7 @@ from sqlalchemy.orm import joinedload
 
 from app.database.dependencies import sessDep
 from app.models.account import Account, AccountStatus
-from app.models.account.schemas import AccountWithItems, TipUpdate
+from app.models.account.schemas import AccountWithItems, PublicAccountResponse, TipUpdate
 from app.models.location import Location
 from app.models.restaurant import Restaurant
 from app.models.table import Table
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/{restaurant_slug}/{location_slug}/{table_number}",
-    response_model=AccountWithItems,
+    response_model=PublicAccountResponse,
     status_code=status.HTTP_200_OK,
     summary="Get active account for a table",
-    description="Returns the current open account for the specified table, including all items.",
+    description="Returns the current open account with restaurant context.",
 )
 async def get_table_account(
     async_session: sessDep,
@@ -37,10 +37,7 @@ async def get_table_account(
     table_number: int,
 ):
     """
-    Get the active account for a table.
-
-    This is the main endpoint customers use after scanning a QR code.
-    Returns the current open account with all items, or 404 if no active account.
+    Get the active account for a table with context.
     """
     # Build query to find the table with its active account
     stmt = (
@@ -83,7 +80,12 @@ async def get_table_account(
         f"at {restaurant_slug}/{location_slug}"
     )
 
-    return open_account
+    return PublicAccountResponse(
+        account=open_account,
+        restaurant_name=table.location.restaurant.name,
+        location_name=table.location.name,
+        table_number=table.number,
+    )
 
 
 @router.patch(

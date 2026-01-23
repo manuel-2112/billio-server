@@ -44,6 +44,14 @@ class AccountWithItems(AccountRead):
         return sum(item.quantity for item in self.items)
 
 
+class PublicAccountResponse(BaseModel):
+    """Respuesta pública completa con contexto del restaurante."""
+    account: AccountWithItems
+    restaurant_name: str
+    location_name: str
+    table_number: int
+
+
 class AccountForDashboard(AccountRead):
     """Account info for dashboard history view."""
     table_number: int
